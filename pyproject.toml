@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "battery-health-forecasting"
+version = "0.1.0"
+description = "Reproducible exploratory baselines for SOH, RUL, and battery-life analysis on the Severson et al. dataset"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "h5py>=3.10",
+    "matplotlib>=3.8",
+    "numpy>=1.26",
+    "pandas>=2.1",
+    "scikit-learn>=1.4",
+    "scipy>=1.11",
+]
+
+[project.optional-dependencies]
+notebooks = [
+    "ipykernel>=6.29",
+    "jupyterlab>=4.1",
+]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.6",
+]
+research = [
+    "optuna>=3.6",
+    "seaborn>=0.13",
+    "torch>=2.2",
+    "tqdm>=4.66",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
