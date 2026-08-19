@@ -1,8 +1,7 @@
-"""Fail when release notebooks or files contain common publication hazards."""
+"""Fail when release scripts or files contain common publication hazards."""
 
 from __future__ import annotations
 
-import json
 import re
 import sys
 from pathlib import Path
@@ -13,42 +12,37 @@ FORBIDDEN_SOURCE = {
     "GPU shell probe": re.compile(r"nvidia-smi", re.IGNORECASE),
     "Windows user path": re.compile(r"[A-Za-z]:\\Users\\"),
     "Colab drive path": re.compile(r"/content/drive/"),
+    "IPython runtime call": re.compile(r"get_ipython\s*\("),
+    "Jupyter display call": re.compile(r"\bdisplay\s*\("),
 }
 FORBIDDEN_SUFFIXES = {".mat", ".pt", ".pth", ".ckpt", ".pkl", ".joblib", ".onnx"}
+SCRIPT_ROOTS = (ROOT / "workflows", ROOT / "research_scripts")
 
 
-def audit_notebook(path: Path) -> list[str]:
+def audit_script(path: Path) -> list[str]:
     errors: list[str] = []
-    notebook = json.loads(path.read_text(encoding="utf-8"))
-    if "widgets" in notebook.get("metadata", {}):
-        errors.append(f"{path}: widget state is present")
-    for index, cell in enumerate(notebook.get("cells", [])):
-        if cell.get("cell_type") != "code":
-            continue
-        if cell.get("execution_count") is not None:
-            errors.append(f"{path}: cell {index} has an execution count")
-        if cell.get("outputs"):
-            errors.append(f"{path}: cell {index} has output")
-        source = "".join(cell.get("source", []))
-        for label, pattern in FORBIDDEN_SOURCE.items():
-            if pattern.search(source):
-                errors.append(f"{path}: cell {index} contains {label}")
-        try:
-            compile(source, f"{path}:cell-{index}", "exec")
-        except SyntaxError as exc:
-            errors.append(f"{path}: cell {index} is not valid Python: {exc.msg}")
+    source = path.read_text(encoding="utf-8")
+    for label, pattern in FORBIDDEN_SOURCE.items():
+        if pattern.search(source):
+            errors.append(f"{path.relative_to(ROOT)} contains {label}")
+    try:
+        compile(source, str(path), "exec")
+    except SyntaxError as exc:
+        errors.append(f"{path.relative_to(ROOT)} is not valid Python: {exc.msg}")
     return errors
 
 
 def main() -> int:
     errors: list[str] = []
-    notebooks = sorted(
-        path for path in ROOT.rglob("*.ipynb") if ".venv" not in path.parts
-    )
-    if not notebooks:
-        errors.append("No curated notebooks found")
+    scripts = sorted(path for directory in SCRIPT_ROOTS for path in directory.rglob("*.py"))
+    if len(scripts) != 39:
+        errors.append(f"Expected 39 public scripts, found {len(scripts)}")
+    for path in scripts:
+        errors.extend(audit_script(path))
+
+    notebooks = [path for path in ROOT.rglob("*.ipynb") if ".venv" not in path.parts]
     for path in notebooks:
-        errors.extend(audit_notebook(path))
+        errors.append(f"Notebook remains in Python-only release: {path.relative_to(ROOT)}")
 
     for path in ROOT.rglob("*"):
         if not path.is_file() or ".venv" in path.parts:
@@ -63,7 +57,7 @@ def main() -> int:
         for error in errors:
             print(f"- {error}")
         return 1
-    print(f"Release audit passed: {len(notebooks)} clean notebooks; no large artifacts found.")
+    print(f"Release audit passed: {len(scripts)} clean scripts; no large artifacts found.")
     return 0
 
 

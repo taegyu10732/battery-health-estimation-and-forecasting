@@ -15,26 +15,23 @@ This project uses the public battery-aging data associated with Severson et al. 
 2018-04-12_batchdata_updated_struct_errorcorrect.mat
 ```
 
-The local source workspace also contains `batch1.mat` and `batch2.mat`. They duplicate the
-first two corrected batches and are not required by this cleaned loader.
-
 ## Point the project at an existing copy
 
-Avoid duplicating the multi-gigabyte files. Set the environment variable before starting
-Jupyter.
+Avoid duplicating the multi-gigabyte files. Set the environment variable before running a
+workflow script.
 
 Windows PowerShell:
 
 ```powershell
 $env:BATTERY_DATA_DIR = "D:\datasets\severson_battery"
-jupyter lab
+python workflows\01_dataset_overview.py
 ```
 
 macOS or Linux:
 
 ```bash
 export BATTERY_DATA_DIR=/datasets/severson_battery
-jupyter lab
+python workflows/01_dataset_overview.py
 ```
 
 If the variable is not set, the loader searches `data/` under the project root and then
@@ -42,7 +39,7 @@ walks upward from the current directory looking for a matching `data/` or `Data/
 
 ## Memory behavior
 
-The raw files contain cycle-level time series and are large. The curated notebooks call
+The raw files contain cycle-level time series and are large. The curated workflow scripts call
 `load_cell_summaries`, which extracts only per-cycle summary arrays and closes each HDF5
 file before opening the next one. Raw current, voltage, and temperature traces are not
 loaded.

@@ -19,7 +19,7 @@ branch as a verified result.
 - Early/middle/long-life class prediction
 - Changed-data and feature-ablation variants
 
-The cleaned `02_early_life_clustering.ipynb` keeps a modest, label-free K-means baseline.
+The cleaned `workflows/02_early_life_clustering.py` keeps a modest, label-free K-means baseline.
 Lifetime is inspected only after the clusters have been assigned.
 
 ## 3. SOH estimation
@@ -31,7 +31,7 @@ Lifetime is inspected only after the clusters have been assigned.
 - Surrogate modeling
 - Physics-informed / DeepHPM-style objectives and empirical parameter variants
 
-The cleaned `03_soh_estimation.ipynb` is intentionally simpler. Its purpose is to make the
+The cleaned `workflows/03_soh_estimation.py` is intentionally simpler. Its purpose is to make the
 data definition, battery-level split, baseline, and metrics auditable before reintroducing
 specialized architectures.
 
@@ -44,7 +44,7 @@ specialized architectures.
 - Fixed 30- and 100-cycle observation windows
 - Short-, middle-, and long-life subsets
 
-The cleaned `04_rul_estimation.ipynb` uses only data available through a fixed observation
+The cleaned `workflows/04_rul_estimation.py` uses only data available through a fixed observation
 cycle and holds out batch 3.
 
 ## 5. Sequence and physics-informed branches
@@ -55,7 +55,7 @@ cycle and holds out batch 3.
 - Additional-information, memory-module, and NTK experiments
 - Ensemble transformer and Bayesian-optimization variants
 
-These branches are included as output-free representatives under `research_notebooks/`.
+These branches are included as cleaned representatives under `research_scripts/`.
 Related copies and horizon-only variants are consolidated by the principles in
 `CONSOLIDATION.md`; original outputs and checkpoints remain excluded. Treat the advanced
 models as research implementations until their split, target, feature availability, seed,
@@ -63,7 +63,7 @@ metric, and artifact format have been revalidated.
 
 ## Recommended next experiment contract
 
-For any new model, record the following at the top of its notebook:
+For any new model, record the following at the top of its script:
 
 1. Prediction time and which signals are available at that time
 2. SOH/RUL/end-of-life definition and cycle-index convention

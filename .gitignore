@@ -9,9 +9,6 @@ htmlcov/
 .venv/
 venv/
 
-# Jupyter
-.ipynb_checkpoints/
-
 # IDE / OS
 .idea/
 .vscode/
@@ -34,4 +31,3 @@ artifacts/*
 *.log
 *.db
 *.sqlite
-

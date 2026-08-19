@@ -16,18 +16,18 @@ The original workspace contained many branches of these ideas: raw-curve and eng
 feature clustering, MLP/CNN/LSTM/sequence-to-sequence models, multi-cycle inputs,
 operating-condition features, knee-point experiments, variational autoencoders, and
 physics-informed or parameter-constrained losses. Repeated branches are consolidated by
-task and exposed as parameters instead of separate near-duplicate notebooks. The public
+task and exposed as parameters instead of separate near-duplicate scripts. The public
 organization is documented in [docs/CONSOLIDATION.md](docs/CONSOLIDATION.md), and the full
 research scope is summarized in [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md).
 
-The release contains **4 curated workflow notebooks plus 35 consolidated research
-notebooks**, covering 11 architecture families and all major methodology branches found
+The release contains **4 curated workflow scripts plus 35 consolidated research
+scripts**, covering 11 architecture families and all major methodology branches found
 in the 106 private source notebooks. See the
 [architecture catalog](docs/ARCHITECTURES.md) and
-[research notebook index](research_notebooks/README.md).
+[research script index](research_scripts/README.md).
 
-This public version intentionally contains **no executed notebook output, raw data,
-trained weights, result tables, or hard-coded GPU selection**. The notebooks are compact
+This public version intentionally contains **no generated output, raw data, trained
+weights, result tables, or hard-coded GPU selection**. The workflow scripts are compact
 CPU baselines designed to establish a reproducible starting point; they do not claim to
 reproduce every legacy experiment or the paper's reported benchmark.
 
@@ -35,12 +35,12 @@ reproduce every legacy experiment or the paper's reported benchmark.
 
 ```text
 .
-├── notebooks/
-│   ├── 01_dataset_overview.ipynb
-│   ├── 02_early_life_clustering.ipynb
-│   ├── 03_soh_estimation.ipynb
-│   └── 04_rul_estimation.ipynb
-├── research_notebooks/       # 35 output-free architecture/method representatives
+├── workflows/
+│   ├── 01_dataset_overview.py
+│   ├── 02_early_life_clustering.py
+│   ├── 03_soh_estimation.py
+│   └── 04_rul_estimation.py
+├── research_scripts/         # 35 architecture/method representatives
 │   ├── clustering/
 │   ├── soh/
 │   ├── rul/
@@ -51,7 +51,7 @@ reproduce every legacy experiment or the paper's reported benchmark.
 ├── data/README.md            # data placement and environment-variable instructions
 ├── docs/                     # experiment map, architecture catalog, and data notes
 ├── scripts/                  # release audit tool
-├── tests/                    # lightweight unit and notebook-hygiene tests
+├── tests/                    # lightweight unit tests
 └── artifacts/                # local outputs; ignored by Git
 ```
 
@@ -65,9 +65,9 @@ Python 3.10 or newer is required. No GPU is required.
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
-python -m pip install -e ".[notebooks]"
+python -m pip install -e .
 $env:BATTERY_DATA_DIR = (Resolve-Path "..\Data")
-jupyter lab
+python workflows\01_dataset_overview.py
 ```
 
 ### macOS or Linux
@@ -76,19 +76,20 @@ jupyter lab
 python -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
-python -m pip install -e ".[notebooks]"
+python -m pip install -e .
 export BATTERY_DATA_DIR=/absolute/path/to/the/mat/files
-jupyter lab
+python workflows/01_dataset_overview.py
 ```
 
-Open the notebooks in numeric order. The loader reads only compact per-cycle summary
-arrays; it does not load the entire multi-gigabyte raw time-series collection into memory.
+Run the workflow scripts in numeric order. Their `# %%` markers provide optional cell-by-cell
+execution in VS Code and Spyder. The loader reads only compact per-cycle summary arrays; it
+does not load the entire multi-gigabyte raw time-series collection into memory.
 
 To inspect or rerun the original PyTorch/Optuna research implementations, install the
 optional research dependencies:
 
 ```bash
-python -m pip install -e ".[notebooks,research]"
+python -m pip install -e ".[research]"
 ```
 
 ## Data
@@ -114,18 +115,18 @@ By default, the curated loader applies the continuation and exclusion rules from
 authors' loading notebook and returns the corrected 124-cell cohort. Pass
 `cohort="all_valid"` only when intentionally inspecting all finite-lifetime raw records.
 
-## Notebooks
+## Workflows
 
-| Notebook | Purpose | Split discipline |
+| Script | Purpose | Split discipline |
 | --- | --- | --- |
-| `01_dataset_overview` | Load cell summaries, inspect lifetimes, capacity fade, temperature, and internal resistance | Descriptive only |
-| `02_early_life_clustering` | Cluster cells using features available through a fixed observation cycle | Unsupervised; lifetime is used only after clustering for interpretation |
-| `03_soh_estimation` | Estimate cycle-level SOH with a compact tree-based baseline | Group split by cell; no cell appears in both train and test |
-| `04_rul_estimation` | Estimate RUL at a fixed early-life observation cycle | Batch 1–2 train, batch 3 test |
+| [`01_dataset_overview.py`](workflows/01_dataset_overview.py) | Load cell summaries, inspect lifetimes, capacity fade, temperature, and internal resistance | Descriptive only |
+| [`02_early_life_clustering.py`](workflows/02_early_life_clustering.py) | Cluster cells using features available through a fixed observation cycle | Unsupervised; lifetime is used only after clustering for interpretation |
+| [`03_soh_estimation.py`](workflows/03_soh_estimation.py) | Estimate cycle-level SOH with a compact tree-based baseline | Group split by cell; no cell appears in both train and test |
+| [`04_rul_estimation.py`](workflows/04_rul_estimation.py) | Estimate RUL at a fixed early-life observation cycle | Batch 1–2 train, batch 3 test |
 
-Change the configuration block near the top of a notebook to run a former variant (for
+Change the configuration block near the top of a script to run a former variant (for
 example, observation horizon, feature ablation, cluster count, or held-out batch) without
-copying the entire notebook.
+copying the entire script.
 
 The feature code keeps identifiers and targets separate from model inputs. In particular,
 cycle life is never used as an SOH feature, and test batteries are not used to fit imputers,
@@ -147,24 +148,24 @@ threshold, nominal capacity, cycle indexing convention, or corrected cell cohort
 ```bash
 python -m pip install -e ".[dev]"
 pytest
-ruff check src tests scripts
+ruff check src tests scripts workflows
 python scripts/audit_release.py
 ```
 
-The audit fails if a notebook contains outputs, execution counters, widget state,
-hard-coded GPU selection, shell GPU probes, or an absolute local path.
+The audit compiles all 39 public scripts and fails on leftover notebooks, hard-coded GPU
+selection, shell GPU probes, absolute local paths, large files, or model/data artifacts.
 
 ## Scope and limitations
 
 - The dataset is small at the cell level. Metrics can vary substantially with the split.
 - Summary features are convenient baselines, not a substitute for careful raw-curve
   processing or electrochemical validation.
-- The SOH notebook includes charge capacity as a proxy feature. For an online estimator,
+- The SOH workflow includes charge capacity as a proxy feature. For an online estimator,
   replace it with signals actually available at inference time.
 - The deep-learning and physics-informed branches are included as cleaned research
-  notebooks, but they are historical implementations rather than verified benchmarks.
+  scripts, but they are historical implementations rather than verified benchmarks.
 - No license is selected for this code yet. Choose an appropriate code license and verify
-  the dataset's terms before making a public release.
+  the dataset's terms before reuse or redistribution.
 
 ## Citation
 

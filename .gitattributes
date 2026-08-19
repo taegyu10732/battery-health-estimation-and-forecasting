@@ -4,4 +4,3 @@
 *.toml text eol=lf
 *.yml text eol=lf
 *.yaml text eol=lf
-*.ipynb text eol=lf

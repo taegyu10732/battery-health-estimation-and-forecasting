@@ -46,7 +46,7 @@ their layer topology rather than as separate architectures.
 The 35 method groups are not claimed to be 35 fundamentally different neural networks.
 They are consolidated research questions or training methods. The 11 architecture families
 describe distinct model topologies. This distinction avoids inflating the count with copied
-notebooks, horizon numbers, or spelling-only filename changes.
+scripts, horizon numbers, or spelling-only filename changes.
 
-The public notebook-level index is
-[`research_notebooks/README.md`](../research_notebooks/README.md).
+The public script-level index is
+[`research_scripts/README.md`](../research_scripts/README.md).
